@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "194214591181",
+    "firebase_url": "https://gravitask-20e58.firebaseio.com",
+    "project_id": "gravitask-20e58",
+    "storage_bucket": "gravitask-20e58.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:194214591181:android:d8c6021590f46630",
+        "android_client_info": {
+          "package_name": "com.sp.gravitask"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "194214591181-fa9ac90k85pv2md2qnepl3rvlrmtk2vr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sp.gravitask",
+            "certificate_hash": "bfe271ea8396b58f87d2d8a14774d0f63944575f"
+          }
+        },
+        {
+          "client_id": "194214591181-mnfqv3ouqe0deim273ku3a02980cj9ka.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwxCaQ6nFNAmGDLRH-PK78R8QXh-AckII"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "194214591181-mnfqv3ouqe0deim273ku3a02980cj9ka.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
