@@ -1,6 +1,7 @@
 package com.sp.gravitask;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -14,7 +15,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,6 +34,8 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
+    Uri uriProfileImage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +90,7 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        //displayUserInfoNav();
+        displayUserInfo();
 
         //Show Defaut Fragment when launch
         if (savedInstanceState == null) {
@@ -98,17 +100,6 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
 
     }
 
-    private void displayUserInfoNav() {
-        FirebaseUser user = auth.getCurrentUser();
-        if (user.getPhotoUrl() != null) {
-            Glide.with(this).load(user.getPhotoUrl().toString()).into(profileImage);
-            String photoURL = user.getPhotoUrl().toString();
-        }
-        if (user.getDisplayName() != null) {
-            profileemail_nav.setText(user.getEmail());
-            profilename_nav.setText(user.getDisplayName());
-        }
-    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -173,13 +164,17 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
 
     private void displayUserInfo(){
         String uid = auth.getUid();
+        final View header = ((NavigationView)findViewById(R.id.nav_view)).getHeaderView(0);
+        CircleImageView circleImageView = findViewById(R.id.profile_image);
+
+
 
         db.collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                   profilename_nav.setText(task.getResult().getString("Name"));
-                   profileemail_nav.setText(task.getResult().getString("Email"));
+                    ((TextView) header.findViewById(R.id.emailDisplay)).setText(task.getResult().getString("Name"));
+                    ((TextView) header.findViewById(R.id.nameDisplay)).setText(task.getResult().getString("Email"));
 
 
 
