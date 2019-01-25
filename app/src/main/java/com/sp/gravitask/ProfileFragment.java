@@ -1,16 +1,18 @@
 package com.sp.gravitask;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -30,8 +32,8 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,7 +43,8 @@ import static android.app.Activity.RESULT_OK;
 
 public class ProfileFragment extends Fragment {
 
-    private static final int CHOOSE_IMAGE = 101;
+    private static final int PICK_IMAGE_REQUEST = 1;
+    //private static final int CHOOSE_IMAGE = 101;
     CircleImageView circleImageView;
     EditText editName, editEmail;
     Button updateProfile;
@@ -49,10 +52,14 @@ public class ProfileFragment extends Fragment {
     ProgressBar progressBar;
     FirebaseAuth auth;
     FirebaseUser user;
-    private StorageReference profileImageRef;
+    private StorageReference profileImageRef, storageRef;
 
     String profileImageUrl;
     FirebaseFirestore db;
+
+    /*private int request_code = 1;
+    private Bitmap bitmap_foto;
+    private byte[] bytes;*/
 
     @Nullable
     @Override
@@ -67,6 +74,7 @@ public class ProfileFragment extends Fragment {
 
         //Get Firestore Database reference
         db = FirebaseFirestore.getInstance();
+
 
         circleImageView = v.findViewById(R.id.profile_image);
         editName = v.findViewById(R.id.profileName);
@@ -150,30 +158,13 @@ public class ProfileFragment extends Fragment {
         //db.collection("Users").document(Uid).update("Name"); //TODO: TAKE NOTE UPDATE FOR SINGLE FIELD
 
 
-
-        /*if(user!=null && profileImageUrl !=null){
-            UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder()
-                    .setDisplayName(displayname)
-                    .setPhotoUri(Uri.parse(profileImageUrl))
-                    .build();
-
-            user.updateProfile(profile).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()) {
-                        Toast.makeText(getActivity(), "Profile Updated", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        } */
-
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == CHOOSE_IMAGE && requestCode == RESULT_OK && data != null && data.getData() != null) {
+        /*if (requestCode == CHOOSE_IMAGE && requestCode == RESULT_OK && data != null && data.getData() != null) {
             uriProfileImage = data.getData();
 
             try {
@@ -183,22 +174,48 @@ public class ProfileFragment extends Fragment {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        }*/
+
+       /* if (resultCode == RESULT_OK && requestCode == request_code) {
+            uriProfileImage = data.getData();
+            circleImageView.setImageURI(uriProfileImage);
+           // bytes = imageToByte(circleImageView);
+            uploadImageToFireBaseStorage(); //TODO: Merge with show choose image
+
+
+        }*/
+
+       if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data !=null && data.getData() !=null ) {
+           uriProfileImage = data.getData();
+
+           circleImageView.setImageURI(uriProfileImage);
+           uploadImageToFireBaseStorage();
+       }
     }
 
     private void uploadImageToFireBaseStorage() {
-        profileImageRef = FirebaseStorage.getInstance().getReference("profilepics/" + System.currentTimeMillis() + ".jpg");
+        storageRef = FirebaseStorage.getInstance().getReference("ProfileImage/");
+        final String uid = auth.getUid();
 
 
         if (uriProfileImage != null) {
             progressBar.setVisibility(View.VISIBLE);
+            profileImageRef = storageRef.child(uid + "." + getFileExtension(uriProfileImage));
+
             profileImageRef.putFile(uriProfileImage).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     progressBar.setVisibility(View.GONE);
-                    profileImageUrl = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString();
-
-
+                    //String profileImageUrl = profileImageRef.getDownloadUrl().toString();
+                    profileImageRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            String downloadUrl = task.getResult().toString();
+                            Map<String, Object> User = new HashMap<>();
+                            User.put("Profile Image", downloadUrl);
+                            db.collection("Users").document(uid).set(User, SetOptions.merge());
+                        }
+                    });
                 }
             })
                     .addOnFailureListener(new OnFailureListener() {
@@ -209,13 +226,6 @@ public class ProfileFragment extends Fragment {
                         }
                     });
         }
-    }
-
-    private void showImageChoose() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Profile Image "), CHOOSE_IMAGE);
     }
 
     private void displayUserInfo(){
@@ -233,6 +243,20 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void showImageChoose() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, PICK_IMAGE_REQUEST);
+
+    }
+
+    private String getFileExtension(Uri uri) {
+        ContentResolver cR = getActivity().getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
     }
 
 }
