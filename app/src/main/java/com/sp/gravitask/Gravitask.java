@@ -1,6 +1,8 @@
 package com.sp.gravitask;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,6 +24,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -166,22 +173,40 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
     private void displayUserInfo(){
         String uid = auth.getUid();
         final View header = ((NavigationView)findViewById(R.id.nav_view)).getHeaderView(0);
-        CircleImageView circleImageView = findViewById(R.id.profile_image);
-
-
+        final CircleImageView circleImageView = (CircleImageView) header.findViewById(R.id.profile_image_nav);
 
         db.collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
+                    String url = task.getResult().getString("ProfileImage");
                     ((TextView) header.findViewById(R.id.emailDisplay)).setText(task.getResult().getString("Name"));
                     ((TextView) header.findViewById(R.id.nameDisplay)).setText(task.getResult().getString("Email"));
-
-
+                    if(url!=null) {
+                        Picasso.get().load(url).into(circleImageView);
+                    }
+                    else {
+                        circleImageView.setImageResource(R.drawable.test);
+                    }
 
                 }
             }
         });
+    }
+
+    public static Bitmap getBitmapFromURL(String src) {
+        try {
+            URL url = new URL(src);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoInput(true);
+            connection.connect();
+            InputStream input = connection.getInputStream();
+            Bitmap myBitmap = BitmapFactory.decodeStream(input);
+            return myBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
 

@@ -96,6 +96,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 changeEmailOnAuth();
+                displayImage();
             }
         });
 
@@ -212,7 +213,7 @@ public class ProfileFragment extends Fragment {
                         public void onComplete(@NonNull Task<Uri> task) {
                             String downloadUrl = task.getResult().toString();
                             Map<String, Object> User = new HashMap<>();
-                            User.put("Profile Image", downloadUrl);
+                            User.put("ProfileImage", downloadUrl);
                             db.collection("Users").document(uid).set(User, SetOptions.merge());
                         }
                     });
@@ -257,6 +258,21 @@ public class ProfileFragment extends Fragment {
         ContentResolver cR = getActivity().getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
+
+    private void displayImage() {
+        String uid = auth.getUid();
+
+        db.collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    String imageurl = task.getResult().getString("ProfileImage");
+                    Picasso.get().load(imageurl).into(circleImageView);
+
+                }
+            }
+        });
     }
 
 }
