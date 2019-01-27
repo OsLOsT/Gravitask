@@ -2,9 +2,7 @@ package com.sp.gravitask;
 
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,6 +27,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.auth.User;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -45,8 +44,8 @@ public class ProfileFragment extends Fragment {
 
     private static final int PICK_IMAGE_REQUEST = 1;
     //private static final int CHOOSE_IMAGE = 101;
-    CircleImageView circleImageView;
-    EditText editName, editEmail;
+    CircleImageView circleImageView, editImage;
+    EditText editName, editEmail, editPhoneNumber;
     Button updateProfile;
     Uri uriProfileImage;
     ProgressBar progressBar;
@@ -76,19 +75,21 @@ public class ProfileFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
 
 
+        editImage = v.findViewById(R.id.edit_image);
         circleImageView = v.findViewById(R.id.profile_image);
         editName = v.findViewById(R.id.profileName);
         editEmail = v.findViewById(R.id.email);
+        editPhoneNumber = v.findViewById(R.id.phoneNumber);
         updateProfile = v.findViewById(R.id.button_updateProfile);
         progressBar = v.findViewById(R.id.progressbar);
 
         displayUserInfo();
+        displayImage();
 
-        circleImageView.setOnClickListener(new View.OnClickListener() {
+        editImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showImageChoose();
-
             }
         });
 
@@ -96,7 +97,6 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 changeEmailOnAuth();
-                displayImage();
             }
         });
 
@@ -112,8 +112,8 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    String email = task.getResult().getString("Email");
-                    String password = task.getResult().getString("Password");
+                    String email = task.getResult().getString("email");
+                    String password = task.getResult().getString("password");
                     // Get auth credentials from the user for re-authentication
                     AuthCredential credential = EmailAuthProvider
                             .getCredential(email, password); // Current Login Credentials \\
@@ -147,13 +147,15 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    private void saveUserInformation() { //TODO: FIND THE PROBLEM USE THE GETTER AND SETTER SOMEHOW
+    private void saveUserInformation() {
         String email = editEmail.getText().toString().trim();
         String profileName = editName.getText().toString().trim();
+        String phoneNumber = editPhoneNumber.getText().toString().trim();
         String Uid = auth.getUid();
         Map<String, Object> User = new HashMap<>();
-        User.put("Name", profileName);
-        User.put("Email", email);
+        User.put("name", profileName);
+        User.put("email", email);
+        User.put("phoneNumber", phoneNumber);
 
         db.collection("Users").document(Uid).set(User, SetOptions.merge());
         //db.collection("Users").document(Uid).update("Name"); //TODO: TAKE NOTE UPDATE FOR SINGLE FIELD
@@ -164,27 +166,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        /*if (requestCode == CHOOSE_IMAGE && requestCode == RESULT_OK && data != null && data.getData() != null) {
-            uriProfileImage = data.getData();
-
-            try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uriProfileImage);
-                circleImageView.setImageBitmap(bitmap);
-                uploadImageToFireBaseStorage();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }*/
-
-       /* if (resultCode == RESULT_OK && requestCode == request_code) {
-            uriProfileImage = data.getData();
-            circleImageView.setImageURI(uriProfileImage);
-           // bytes = imageToByte(circleImageView);
-            uploadImageToFireBaseStorage(); //TODO: Merge with show choose image
-
-
-        }*/
 
        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data !=null && data.getData() !=null ) {
            uriProfileImage = data.getData();
@@ -213,7 +194,7 @@ public class ProfileFragment extends Fragment {
                         public void onComplete(@NonNull Task<Uri> task) {
                             String downloadUrl = task.getResult().toString();
                             Map<String, Object> User = new HashMap<>();
-                            User.put("ProfileImage", downloadUrl);
+                            User.put("profileimage", downloadUrl);
                             db.collection("Users").document(uid).set(User, SetOptions.merge());
                         }
                     });
@@ -236,9 +217,9 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    editName.setText(task.getResult().getString("Name"));
-                    editEmail.setText(task.getResult().getString("Email"));
-
+                    editName.setText(task.getResult().getString("name"));
+                    editEmail.setText(task.getResult().getString("email"));
+                    editPhoneNumber.setText(task.getResult().getString("phoneNumber"));
 
 
                 }
@@ -267,8 +248,13 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    String imageurl = task.getResult().getString("ProfileImage");
-                    Picasso.get().load(imageurl).into(circleImageView);
+                    String url = task.getResult().getString("profileimage");
+                    if(url!=null) {
+                        Picasso.get().load(url).into(circleImageView);
+                    }
+                    else {
+                        circleImageView.setImageResource(R.drawable.test);
+                    }
 
                 }
             }

@@ -76,6 +76,8 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
                     // launch login activity
                     startActivity(new Intent(Gravitask.this, LoginActivity.class));
                     finish();
+                }else{
+                    displayUserInfo();
                 }
             }
         };
@@ -98,7 +100,6 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        displayUserInfo();
 
         //Show Defaut Fragment when launch
         if (savedInstanceState == null) {
@@ -179,9 +180,9 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    String url = task.getResult().getString("ProfileImage");
-                    ((TextView) header.findViewById(R.id.emailDisplay)).setText(task.getResult().getString("Name"));
-                    ((TextView) header.findViewById(R.id.nameDisplay)).setText(task.getResult().getString("Email"));
+                    String url = task.getResult().getString("profileimage");
+                    ((TextView) header.findViewById(R.id.emailDisplay)).setText(task.getResult().getString("name"));
+                    ((TextView) header.findViewById(R.id.nameDisplay)).setText(task.getResult().getString("email"));
                     if(url!=null) {
                         Picasso.get().load(url).into(circleImageView);
                     }

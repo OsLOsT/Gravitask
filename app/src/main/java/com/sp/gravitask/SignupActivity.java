@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class SignupActivity extends AppCompatActivity {
 
-    private EditText inputEmail, inputPassword, inputProfileName;
+    private EditText inputEmail, inputPassword, inputProfileName, inputPhoneNumber;
     private Button btnSignIn, btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
@@ -45,6 +45,7 @@ public class SignupActivity extends AppCompatActivity {
         btnSignIn = (Button) findViewById(R.id.sign_in_button);
         btnSignUp = (Button) findViewById(R.id.sign_up_button);
         inputEmail = (EditText) findViewById(R.id.email);
+        inputPhoneNumber = (EditText) findViewById(R.id.phoneNumber);
         inputPassword = (EditText) findViewById(R.id.password);
         inputProfileName = (EditText) findViewById(R.id.profileName);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
@@ -127,13 +128,13 @@ public class SignupActivity extends AppCompatActivity {
         String email = inputEmail.getText().toString().trim();
         String password = inputPassword.getText().toString().trim();
         String profileName = inputProfileName.getText().toString().trim();
+        String phoneNumber = inputPhoneNumber.getText().toString().trim();
+        int points = 0;
         String Uid = auth.getUid();
 
-        Map<String, Object> User = new HashMap<>();
-        User.put("Name", profileName);
-        User.put("Email", email);
-        User.put("Password", password);
-        db.collection("Users").document(Uid).set(User);
+        Users users = new Users(profileName ,email, password ,phoneNumber ,points);
+
+        db.collection("Users").document(Uid).set(users);
     }
 }
 
