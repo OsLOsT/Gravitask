@@ -1,10 +1,10 @@
-package com.sp.gravitask;
+package com.sp.gravitask; // NOT IN USED
 
-public class Profile {
+public class Profile { // NOT IN USED
 
-    String profileName;
-    String email;
-    String password;
+    String profileName; // NOT IN USED
+    String email; // NOT IN USED
+    String password; // NOT IN USED
 
     public Profile(String profileName, String email, String password) {
         this.profileName = profileName;

@@ -106,12 +106,10 @@ public class ErrandsFragment extends Fragment {
             if(requestCode==REQUEST_CAMERA){
                 cameraImageUri = data.getData();
                 imageShown.setImageURI(cameraImageUri);
-                uploadImageToFireBaseStorage();
 
             }else if(requestCode==SELECT_FILE){
                 selectImageUri = data.getData();
                 imageShown.setImageURI(selectImageUri);
-                uploadImageToFireBaseStorage();
 
             }
 
@@ -133,10 +131,13 @@ public class ErrandsFragment extends Fragment {
                     startActivityForResult(intent, REQUEST_CAMERA);
 
                 }else if(items[i].equals("Choose from gallery")){
-
-                    Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    Intent intent = new Intent();
+                    //Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     intent.setType("image/*");
-                    startActivityForResult(intent.createChooser(intent, "Select File"), SELECT_FILE);
+                    //startActivityForResult(intent.createChooser(intent, "Select File"), SELECT_FILE);
+
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(intent, SELECT_FILE);
 
                 }else if(items[i].equals("Cancel")){
                     dialogInterface.dismiss();
@@ -222,6 +223,7 @@ public class ErrandsFragment extends Fragment {
             public void onSuccess(DocumentReference documentReference) {
                 Toast.makeText(getActivity(), "Errand Successfully added", Toast.LENGTH_SHORT).show();
                 docId = documentReference.getId();
+                uploadImageToFireBaseStorage();
 
             }
         });
