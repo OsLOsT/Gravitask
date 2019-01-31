@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,8 +26,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -37,16 +42,24 @@ import java.util.Map;
 
 import io.grpc.Context;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class ErrandsFragment extends Fragment {
 
     EditText errandName, errandDescription;
+    String email, userName;
     ImageView imageShown;
     Button publishTask, mapView, takePicture;
     FirebaseFirestore db;
     Integer REQUEST_CAMERA = 1, SELECT_FILE=0;
     Uri selectImageUri,cameraImageUri;
     String docId;
+    FirebaseAuth auth;
+    FirebaseUser user;
     private StorageReference errandImageRef, storageRef;
+    SharedPreferences prefs_start, prefs_end;
+    Double lat_start, lng_start, lat_end, lng_end;
+
 
     @Nullable
     @Override
@@ -63,8 +76,15 @@ public class ErrandsFragment extends Fragment {
         takePicture = v.findViewById(R.id.errand_picturebutton);
         mapView = v.findViewById(R.id.errand_map);
 
+
         //Get Firebase firestore reference
         db = FirebaseFirestore.getInstance();
+
+        //Get Firebase auth instance
+        auth = FirebaseAuth.getInstance();
+
+        //Get Firebase current user
+        user = auth.getCurrentUser();
 
 
         takePicture.setOnClickListener(new View.OnClickListener() {
@@ -210,23 +230,58 @@ public class ErrandsFragment extends Fragment {
 
 
     private void addTask() {
-        String errandAddName = errandName.getText().toString().trim();
-        String errandAddDescription = errandDescription.getText().toString().trim();
+        final String errandAddName = errandName.getText().toString().trim();
+        final String errandAddDescription = errandDescription.getText().toString().trim();
+
+        String uid = auth.getUid();
 
 
-        Map<String, Object> Errand = new HashMap<>();
-        Errand.put("name", errandAddName);
-        Errand.put("description", errandAddDescription);
+        prefs_start = this.getActivity().getSharedPreferences("LatLng_start", MODE_PRIVATE);
+        prefs_end = this.getActivity().getSharedPreferences("LatLng_end", MODE_PRIVATE);
 
-        db.collection("Errands").add(Errand).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        lat_start = Double.parseDouble(prefs_start.getString("Lat_start", ""));
+        lng_start = Double.parseDouble(prefs_start.getString("Lng_start", ""));
+
+        lat_end = Double.parseDouble(prefs_end.getString("Lat_end", ""));
+        lng_end = Double.parseDouble(prefs_end.getString("Lng_end", ""));
+
+        final GeoPoint gpstart = new GeoPoint(lat_start, lng_start);
+        final GeoPoint gpend = new GeoPoint(lat_end, lng_end);
+
+        db.collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onSuccess(DocumentReference documentReference) {
-                Toast.makeText(getActivity(), "Errand Successfully added", Toast.LENGTH_SHORT).show();
-                docId = documentReference.getId();
-                uploadImageToFireBaseStorage();
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    email = task.getResult().getString("email");
+                    userName = task.getResult().getString("name");
 
+                    Map<String, Object> Errand = new HashMap<>();
+                    Errand.put("name", errandAddName);
+                    Errand.put("description", errandAddDescription);
+                    Errand.put("email", email);
+                    Errand.put("profilename", userName);
+                    Errand.put("start", gpstart); //TODO: Use geofence to alert the user when there is a task nearby for them to accept
+                    Errand.put("end", gpend); //TODO: Geofence will validate such that the taskee is only allowed to click the finish task button to earn their points
+
+
+                    db.collection("Errands").add(Errand).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Toast.makeText(getActivity(), "Errand Successfully added", Toast.LENGTH_SHORT).show();
+                            docId = documentReference.getId();
+                            uploadImageToFireBaseStorage();
+
+                        }
+                    });
+
+
+                }
             }
         });
+
+
+
     }
+
 
 }

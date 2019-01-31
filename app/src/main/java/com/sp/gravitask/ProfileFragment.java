@@ -51,10 +51,11 @@ public class ProfileFragment extends Fragment {
     ProgressBar progressBar;
     FirebaseAuth auth;
     FirebaseUser user;
+    FirebaseFirestore db;
     private StorageReference profileImageRef, storageRef;
 
     String profileImageUrl;
-    FirebaseFirestore db;
+
 
     /*private int request_code = 1;
     private Bitmap bitmap_foto;
