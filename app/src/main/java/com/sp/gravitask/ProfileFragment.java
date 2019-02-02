@@ -54,12 +54,6 @@ public class ProfileFragment extends Fragment {
     FirebaseFirestore db;
     private StorageReference profileImageRef, storageRef;
 
-    String profileImageUrl;
-
-
-    /*private int request_code = 1;
-    private Bitmap bitmap_foto;
-    private byte[] bytes;*/
 
     @Nullable
     @Override
@@ -189,7 +183,6 @@ public class ProfileFragment extends Fragment {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     progressBar.setVisibility(View.GONE);
-                    //String profileImageUrl = profileImageRef.getDownloadUrl().toString();
                     profileImageRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                         @Override
                         public void onComplete(@NonNull Task<Uri> task) {
