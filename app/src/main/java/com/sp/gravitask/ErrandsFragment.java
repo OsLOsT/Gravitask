@@ -233,7 +233,7 @@ public class ErrandsFragment extends Fragment {
         final String errandAddName = errandName.getText().toString().trim();
         final String errandAddDescription = errandDescription.getText().toString().trim();
 
-        String uid = auth.getUid();
+        final String uid = auth.getUid();
 
 
         prefs_start = this.getActivity().getSharedPreferences("LatLng_start", MODE_PRIVATE);
@@ -248,40 +248,17 @@ public class ErrandsFragment extends Fragment {
         final GeoPoint gpstart = new GeoPoint(lat_start, lng_start);
         final GeoPoint gpend = new GeoPoint(lat_end, lng_end);
 
-        db.collection("Users").document(uid).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        Errands errands = new Errands(errandAddName, errandAddDescription, uid, gpstart, gpend);
+
+        db.collection("Errands").add(errands).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    email = task.getResult().getString("email");
-                    userName = task.getResult().getString("name");
+            public void onSuccess(DocumentReference documentReference) {
+                Toast.makeText(getActivity(), "Errand Successfully added", Toast.LENGTH_SHORT).show();
+                docId = documentReference.getId();
+                uploadImageToFireBaseStorage();
 
-                    Map<String, Object> Errand = new HashMap<>();
-                    Errand.put("name", errandAddName);
-                    Errand.put("description", errandAddDescription);
-                    Errand.put("email", email);
-                    Errand.put("profilename", userName);
-                    Errand.put("start", gpstart); //TODO: Use geofence to alert the user when there is a task nearby for them to accept
-                    Errand.put("end", gpend); //TODO: Geofence will validate such that the taskee is only allowed to click the finish task button to earn their points
-
-
-                    db.collection("Errands").add(Errand).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Toast.makeText(getActivity(), "Errand Successfully added", Toast.LENGTH_SHORT).show();
-                            docId = documentReference.getId();
-                            uploadImageToFireBaseStorage();
-
-                        }
-                    });
-
-
-                }
             }
         });
 
-
-
     }
-
-
 }
