@@ -8,17 +8,28 @@ public class Users {
     private String Password;
     private String PhoneNumber;
     private int Points;
+    private boolean taskAccepted;
 
 
 
     public Users() {}
 
-    public Users(String Name, String Email, String Password, String PhoneNumber, int Points) {
+
+    public Users(String Name, String Email, String Password, String PhoneNumber, int Points, boolean taskAccepted) {
         this.Name = Name;
         this.Email = Email;
         this.Password = Password;
         this.PhoneNumber = PhoneNumber;
         this.Points = Points;
+        this.taskAccepted = taskAccepted;
+    }
+
+    public boolean isTaskAccepted() {
+        return taskAccepted;
+    }
+
+    public void setTaskAccepted(boolean taskAccepted) {
+        this.taskAccepted = taskAccepted;
     }
 
     public String getName() {

@@ -16,6 +16,11 @@
             android:id="@+id/nav_task"
             android:icon="@drawable/ic_task"
             android:title="Tasks" />
+
+        <item
+            android:id="@+id/nav_taskView"
+            android:icon="@drawable/ic_task"
+            android:title="Current Task" />
         <item
             android:id="@+id/nav_points"
             android:icon="@drawable/ic_points"

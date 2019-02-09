@@ -153,7 +153,7 @@ public class ProfileFragment extends Fragment {
         User.put("phoneNumber", phoneNumber);
 
         db.collection("Users").document(Uid).set(User, SetOptions.merge());
-        //db.collection("Users").document(Uid).update("Name"); //TODO: TAKE NOTE UPDATE FOR SINGLE FIELD
+        //db.collection("Users").document(Uid).update("Name"); //TAKE NOTE UPDATE FOR SINGLE FIELD
 
 
     }

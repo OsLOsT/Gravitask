@@ -116,6 +116,9 @@ public class Gravitask extends AppCompatActivity implements NavigationView.OnNav
             case R.id.nav_task:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new TasksFragment()).commit();
                 break;
+            case R.id.nav_taskView:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new TaskViewFragment()).commit();
+                break;
             case R.id.nav_errands:
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ErrandsFragment()).commit();
                 break;

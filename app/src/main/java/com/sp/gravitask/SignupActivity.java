@@ -130,9 +130,10 @@ public class SignupActivity extends AppCompatActivity {
         String profileName = inputProfileName.getText().toString().trim();
         String phoneNumber = inputPhoneNumber.getText().toString().trim();
         int points = 0;
+        boolean taskAccepted = false;
         String Uid = auth.getUid();
 
-        Users users = new Users(profileName ,email, password ,phoneNumber ,points);
+        Users users = new Users(profileName ,email, password ,phoneNumber ,points, taskAccepted);
 
         db.collection("Users").document(Uid).set(users);
     }

@@ -2,25 +2,26 @@ package com.sp.gravitask;
 
 import com.google.firebase.firestore.GeoPoint;
 
-public class Errands {
-
+public class TaskAcceptDialog {
     private String name;
     private String description;
     private String uid;
     private GeoPoint gpstart;
     private GeoPoint gpend;
+    private String errandimage;
     private boolean taskFinished;
 
-    public Errands() {
+    public TaskAcceptDialog() {
     }
 
-    public Errands(String name, String description, String uid, boolean taskFinished, GeoPoint gpstart, GeoPoint gpend) {
+    public TaskAcceptDialog(String name, String description, String uid, boolean taskFinished, GeoPoint gpstart, GeoPoint gpend, String errandimage) {
         this.name = name;
         this.description = description;
         this.uid = uid;
         this.taskFinished = taskFinished;
         this.gpstart = gpstart;
         this.gpend = gpend;
+        this.errandimage = errandimage;
     }
 
     public boolean isTaskFinished() {
@@ -69,5 +70,13 @@ public class Errands {
 
     public void setGpend(GeoPoint gpend) {
         this.gpend = gpend;
+    }
+
+    public String getErrandimage() {
+        return errandimage;
+    }
+
+    public void setErrandimage(String errandimage) {
+        this.errandimage = errandimage;
     }
 }
